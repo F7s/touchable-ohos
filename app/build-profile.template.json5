@@ -1,0 +1,46 @@
+// Template: copy to build-profile.json5 and fill in signing material (passwords stay on this machine only).
+// Device-local file, not committed; see .gitignore.
+{
+  app: {
+    signingConfigs: [
+      {
+        name: 'default',
+        type: 'HarmonyOS',
+        material: {
+          certpath: '<path to your debug .cer>',
+          keyAlias: 'debugKey',
+          keyPassword: '',
+          profile: '<path to your debug .p7b>',
+          signAlg: 'SHA256withECDSA',
+          storeFile: '<path to your debug .p12>',
+          storePassword: '',
+        },
+      },
+    ],
+    products: [
+      {
+        name: 'default',
+        signingConfig: 'default',
+        targetSdkVersion: '26.0.0',
+        compatibleSdkVersion: '26.0.0',
+        runtimeOS: 'HarmonyOS',
+      },
+    ],
+    buildModeSet: [
+      { name: 'debug' },
+      { name: 'release' },
+    ],
+  },
+  modules: [
+    {
+      name: 'entry',
+      srcPath: './entry',
+      targets: [
+        {
+          name: 'default',
+          applyToProducts: ['default'],
+        },
+      ],
+    },
+  ],
+}

@@ -1,0 +1,13 @@
+# Python packages for the vendored from-image pipeline (tools/build_from_image.py).
+# Python 3.11+. The app build itself and tools/make_pack.py use the standard library only.
+#
+#   python3 -m pip install -r requirements.txt
+
+lz4          # patch_nso.py: module compression
+capstone     # patch_nso.py: ARM64 disassembly
+
+# Optional: dumps without a [title ID] tag or ticket (the title ID is read from the NCA headers).
+pycryptodome
+
+# Optional: zstd-compressed SPIR-V in shaders.dmsv (Python < 3.14; 3.14 has compression.zstd).
+backports.zstd; python_version < "3.14"

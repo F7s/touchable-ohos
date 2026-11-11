@@ -1,0 +1,11 @@
+{
+  "name": "entry",
+  "version": "0.1.0",
+  "description": "nx2android HarmonyOS NEXT host",
+  "main": "",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "libdmhost.so": "file:./src/main/cpp/types/libdmhost"
+  }
+}

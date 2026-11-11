@@ -1,0 +1,33 @@
+# Machine-local signing configuration (encrypted passwords, certificate paths): never committed.
+# Template: build-profile.template.json5
+/build-profile.json5
+/node_modules
+/oh_modules
+/local.properties
+/.idea
+**/build
+/.hvigor
+.cxx
+/.clangd
+/.clang-format
+/.clang-tidy
+**/.test
+/.appanalyzer
+/.cache/node_modules
+/.preview
+
+# C0 bring-up staging (tools/stage_c0_package.sh): prebuilt host core and rewritten modules. Development only,
+# never committed; both are regenerated from tools and the player's own game files.
+# Exception: the prebuilt game core is part of the published shell (the app links it by soname).
+/entry/libs/*
+!/entry/libs/arm64-v8a/
+/entry/libs/arm64-v8a/*
+!/entry/libs/arm64-v8a/libdmcore.so
+/entry/src/main/resources/rawfile/c0mods/
+/entry/src/main/resources/rawfile/c0mods.manifest
+/entry/src/main/resources/rawfile/c0mods.version
+
+# P1 data-pack staging (tools/stage_data_pack.sh): rewritten modules + devpack rawfile. Development only, never committed.
+/entry/src/main/resources/rawfile/devpack/
+/entry/src/main/resources/rawfile/devpack.manifest
+/entry/src/main/resources/rawfile/devpack.version

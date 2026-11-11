@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "节奏天国 奇迹之星 HarmonyOS host"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "节奏天国 奇迹之星"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "节奏天国 奇迹之星"
+    }
+  ]
+}

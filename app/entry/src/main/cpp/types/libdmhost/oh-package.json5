@@ -1,0 +1,1 @@
+{ "name": "libdmhost.so", "types": "./index.d.ts", "version": "0.1.0", "description": "nx2android HarmonyOS NEXT host (NAPI)" }
