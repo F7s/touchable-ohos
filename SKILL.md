@@ -92,6 +92,15 @@ UI (bottom-left) → **导入数据包（ZIP）** or **导入数据包（文件�
 - Folder import tree-copies the parts (peak ≈ 2× the pack).
 - Transfer the zip over USB; hdc over Wi-Fi measured ~3 MB/s (~14 min for 2.6 GB).
 
+### E. Release
+
+1. Build the code-only HAP (flow A), confirm `unzip -l` has no game data.
+2. `git status --ignored` — nothing under `out/`, `dist/`, `*.hap`, game files staged.
+3. Tag + GitHub release, attach the **unsigned** code-only HAP and its sha256. Do not attach signed
+   HAPs (they carry the builder's certificate) or any pack.
+4. Release notes: supported title ID, HarmonyOS 7.0/API 26/arm64, "bring your own game files", link to
+   `docs/TUTORIAL.md`.
+
 ### F. Data pack only (no DevEco Studio / devecocli)
 
 For players who install the published release HAP instead of building one:
@@ -109,15 +118,6 @@ python3 tools/build_from_image.py \
 `app/build-profile.json5`, no app/native copy. The HAP comes from the GitHub release and is installed
 with a third-party sideload tool (e.g. 小白调试助手); the pack is imported through
 **UI → 导入数据包（ZIP）**.
-
-### E. Release
-
-1. Build the code-only HAP (flow A), confirm `unzip -l` has no game data.
-2. `git status --ignored` — nothing under `out/`, `dist/`, `*.hap`, game files staged.
-3. Tag + GitHub release, attach the **unsigned** code-only HAP and its sha256. Do not attach signed
-   HAPs (they carry the builder's certificate) or any pack.
-4. Release notes: supported title ID, HarmonyOS 7.0/API 26/arm64, "bring your own game files", link to
-   `docs/TUTORIAL.md`.
 
 ## Verification checklist
 
