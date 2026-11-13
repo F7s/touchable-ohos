@@ -195,8 +195,10 @@ def main():
         if args.keep_pack_dir:
             print(f'data pack:    {pack} (kept with --keep-pack-dir)')
         else:
-            # Players only need the single zip; dropping the tree saves ~3.2 GB.
+            # Players only need the single zip; dropping the tree saves ~3.2 GB. The rewritten modules
+            # under out/mods/ are an intermediate too.
             shutil.rmtree(pack, ignore_errors=True)
+            shutil.rmtree(out / 'mods', ignore_errors=True)
             print('data pack:    not kept (use --keep-pack-dir to keep out/game-pack)')
         print('Pack only: no HAP was built. Install the release HAP, then import the zip in the app '
               '(UI -> 导入数据包（ZIP）).')
