@@ -1,38 +1,67 @@
 # Third-party notices
 
+This project builds on the following open-source projects. Each keeps its own license.
+
 ## Touchable
 
-This project ports the HarmonyOS front-end and host integration from Touchable's
-iOS Rhythm Heaven implementation.
+The HarmonyOS front end ports the UI/host integration and the touch layer of Touchable's iOS
+Rhythm Heaven implementation (`internal/platform/ios/App.m` and the menu/touch behaviour).
 
-- Project: Touchable
+- Project: Touchable (`Touchable-main`)
+- Copyright (c) mzhao
 - License: MIT
+
+## d2r-mobile
+
+The HarmonyOS app shell follows d2r-mobile: the stage-model `EntryAbility` / `Index` page layout
+and the native CMake project structure (`dm/harmony/native/CMakeLists.txt`) are adapted from it,
+as marked in the file headers.
+
+- Project: https://github.com/jhaizhou-ops/d2r-mobile
+- Copyright (c) 2026 jhaizhou
+- License: MIT
+
+## nx2android / nxnative toolchain (vendored)
+
+`vendor/nx2a/` contains the game-image build toolchain from nx2android (Python sources and the
+prebuilt `dmsh_xlate` .NET translator), vendored so that `tools/build_from_image.py` needs no
+external checkout. Its provenance and the exact list of vendored paths are in
+`vendor/nx2a/README.md`.
+
+- Project: https://github.com/seedds/nx2android (nxnative)
+- Copyright (c) 2026 seedds
+- License: MIT, `vendor/nx2a/LICENSE`
+
+Bundled inside the vendored translator (`dmsh_xlate_bin/`):
+
+| Component | License |
+|---|---|
+| Ryujinx (`Ryujinx.Graphics.Shader`, `Ryujinx.Common`) | MIT |
+| Spv.Generator | MIT |
+| Humanizer | MIT |
+| Gommon | MIT |
+| Microsoft.IO.RecyclableMemoryStream | MIT |
+| MsgPack | MIT |
+
+Build-time NuGet dependency of `nx_extract` (not vendored): **LibHac** (MIT).
+
+Upstream third-party details: nx2android `nxnative/dm/third_party/README.md`.
 
 ## bcn_layer / Granite BC7 shader
 
-`app/entry/src/main/cpp` and the prebuilt core include the BC7 compute shader
-from leegao/bcn_layer `shader-v3`, originally from Themaister/Granite.
+The prebuilt core includes the BC7 compute shader from leegao/bcn_layer `shader-v3`, originally
+from Themaister/Granite.
 
 - Project: https://github.com/leegao/bcn_layer
 - Original: https://github.com/Themaister/Granite
 - License: MIT
 
-## nx2android / nxnative toolchain (vendored)
+## System libraries
 
-`vendor/nx2a/` contains the game-image build toolchain from nx2android (Python
-sources and the prebuilt `dmsh_xlate` .NET translator), vendored so that
-`tools/build_from_image.py` needs no external checkout.
-
-- Project: nx2android / nxnative
-- License: MIT (Copyright (c) 2026 seedds), `vendor/nx2a/LICENSE`
-- Shader translator: Ryujinx (`Ryujinx.Graphics.Shader`, `Ryujinx.Common`,
-  `Spv.Generator`), MIT
-- Helper libraries in `dmsh_xlate_bin/`: Humanizer, Gommon,
-  Microsoft.IO.RecyclableMemoryStream, MsgPack — MIT
-
-Upstream third-party details: nx2android `nxnative/dm/third_party/README.md`.
+The app links HarmonyOS system libraries (ArkUI/N-API, Vulkan, native window/image, hilog, zlib).
+They are provided by the platform and are not redistributed here.
 
 ## Other components
 
-Additional third-party components and their licenses are listed in the
-nx2android repository.
+Additional third-party components of the vendored porting core are listed in the nx2android
+repository (`nxnative/dm/third_party/README.md`).

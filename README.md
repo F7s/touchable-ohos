@@ -342,9 +342,16 @@ core 的线程槽位偏移是按某版 musl 测的，系统 libc 变了。需要
 
 ## 第三方
 
-- Touchable（菜单/音频/震动/触屏参考），MIT
-- bcn_layer `shader-v3` / Granite 的 `bc7.comp`，MIT
-- 其余 third-party 许可见 nx2android 仓库
+本项目参考/移植了以下开源项目（完整说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)）：
+
+- **Touchable**（菜单/音频/震动/触屏层参考），MIT，Copyright (c) mzhao
+- **d2r-mobile**（HarmonyOS 工程结构、EntryAbility/Index 页面布局、native CMake 结构），MIT，
+  Copyright (c) 2026 jhaizhou，https://github.com/jhaizhou-ops/d2r-mobile
+- **nx2android / nxnative**（vendor 的转链工具链），MIT，Copyright (c) 2026 seedds，
+  https://github.com/seedds/nx2android
+- **Ryujinx**（`Ryujinx.Graphics.Shader` / `Ryujinx.Common`，随 vendor 的 shader 翻译器），MIT
+- **bcn_layer `shader-v3` / Granite** 的 `bc7.comp`，MIT
+- 构建期依赖：nx_extract 使用 LibHac（MIT）
 
 ## 许可证
 
