@@ -110,12 +110,12 @@ python3 -m pip install -r requirements.txt          # Python 3.11+ and .NET SDK 
 python3 tools/build_from_image.py \
   --keys /path/to/prod.keys \
   --game /path/to/folder-with-nsp-or-xci \
-  --pack-only --archive
-# out/game-pack/ + out/touchable-ohos-0100D9F01D474000-gamepack.zip
+  --pack-only
+# out/touchable-ohos-0100D9F01D474000-gamepack.zip (the unpacked game-pack/ is removed)
 ```
 
-`--pack-only` stops after step 5 (pack assembly): no `devecocli`, no
-`app/build-profile.json5`, no app/native copy. The HAP comes from the GitHub release and is installed
+`--pack-only` writes the zip and stops after step 5 (pack assembly): no `devecocli`, no
+`app/build-profile.json5`, no app/native copy. `--keep-pack-dir` keeps `out/game-pack/` for debugging. The HAP comes from the GitHub release and is installed
 with a third-party sideload tool (e.g. 小白调试助手); the pack is imported through
 **UI → 导入数据包（ZIP）**.
 

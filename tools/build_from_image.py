@@ -14,8 +14,9 @@ vendor/nx2a/ (from nx2android, MIT; see vendor/nx2a/README.md). Only Python 3.11
 Python packages in requirements.txt are needed.
 
 Usage:
-  # data pack only: no DevEco Studio / devecocli required (for players who install the release HAP)
-  python3 tools/build_from_image.py --keys prod.keys --game ./game --pack-only --archive
+  # data pack only: no DevEco Studio / devecocli required (for players who install the release HAP).
+  # Writes out/touchable-ohos-<title>-gamepack.zip and removes the unpacked game-pack/ afterwards.
+  python3 tools/build_from_image.py --keys prod.keys --game ./game --pack-only
 
   # data pack + unsigned HAP: needs DevEco Studio (devecocli) and a local signing config
   python3 tools/build_from_image.py --keys prod.keys --game ./game --no-embed-pack --archive
@@ -74,7 +75,7 @@ def check_dotnet():
 
 
 def main():
-    ap = argparse.ArgumentParser(description='Build an unsigned Rhythm Heaven HAP from a game image')
+    ap = argparse.ArgumentParser(description='Build a Rhythm Heaven data pack (and optionally an unsigned HAP) from a game image')
     ap.add_argument('--keys', required=True, type=Path, help='prod.keys')
     ap.add_argument('--game', required=True, type=Path, help='folder with the base NSP/XCI')
     ap.add_argument('--out', type=Path, default=None,
@@ -83,12 +84,15 @@ def main():
     ap.add_argument('--language', default='en-US')
     ap.add_argument('--version', default='1.0.0')
     ap.add_argument('--pack-only', action='store_true',
-                    help='stop after game-pack/ (and --archive): no DevEco Studio, devecocli or signing '
-                         'config needed; the player installs the release HAP')
+                    help='write only the .zip pack (game-pack/ is removed afterwards): no DevEco '
+                         'Studio, devecocli or signing config needed; the player installs the release HAP')
     ap.add_argument('--no-embed-pack', action='store_true',
                     help='do not put game data into the HAP; emit game-pack/ beside it')
     ap.add_argument('--archive', action='store_true',
-                    help='also write <out>/touchable-ohos-<title>-gamepack.zip for the app ZIP import')
+                    help='HAP builds only: also write <out>/touchable-ohos-<title>-gamepack.zip '
+                         '(pack-only builds always write the zip)')
+    ap.add_argument('--keep-pack-dir', action='store_true',
+                    help='pack-only: keep the unpacked out/game-pack (default: only the .zip is kept)')
     ap.add_argument('--keep-work', action='store_true')
     args = ap.parse_args()
 
@@ -178,19 +182,24 @@ def main():
     print(f'[{5}/{total}] building data pack', flush=True)
     pack = out / 'game-pack'
     archive = out / f'touchable-ohos-{args.title_id}-gamepack.zip'
+    want_zip = args.archive or args.pack_only
     pack_cmd = [sys.executable, HERE / 'make_pack.py',
                 '--romfs', romfs, '--mods', mods, '--shaders', shaders,
                 '--out', pack, '--version', args.version, '--lang', args.language]
-    if args.archive:
+    if want_zip:
         pack_cmd += ['--zip', str(archive)]
     run(pack_cmd)
 
     if args.pack_only:
-        print(f'\ndata pack:    {pack}')
-        if args.archive:
-            print(f'zip archive:  {archive}')
-        print('Pack only: no HAP was built. Install the release HAP, then import the pack in the app '
-              '(UI -> 导入数据包（ZIP）/（文件夹）).')
+        print(f'\nzip archive:  {archive}')
+        if args.keep_pack_dir:
+            print(f'data pack:    {pack} (kept with --keep-pack-dir)')
+        else:
+            # Players only need the single zip; dropping the tree saves ~3.2 GB.
+            shutil.rmtree(pack, ignore_errors=True)
+            print('data pack:    not kept (use --keep-pack-dir to keep out/game-pack)')
+        print('Pack only: no HAP was built. Install the release HAP, then import the zip in the app '
+              '(UI -> 导入数据包（ZIP）).')
         if not args.keep_work:
             shutil.rmtree(work, ignore_errors=True)
         return
@@ -225,7 +234,7 @@ def main():
     shutil.copyfile(hap, final)
     print(f'\nunsigned HAP: {final}')
     print(f'data pack:    {pack}')
-    if args.archive:
+    if want_zip:
         print(f'zip archive:  {archive}')
     if args.no_embed_pack:
         print('HAP has no game data; import game-pack/ in the app.')

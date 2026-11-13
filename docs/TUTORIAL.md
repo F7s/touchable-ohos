@@ -205,19 +205,18 @@ python3 -m pip install -r requirements.txt
 python3 tools/build_from_image.py \
   --keys /path/to/prod.keys \
   --game /path/to/game-folder \
-  --pack-only \
-  --archive
+  --pack-only
 ```
 
-产物：
+产物（**默认只保留 zip，不保留 3.2 GB 的 game-pack 目录**）：
 
 ```text
-out/game-pack/                                    数据包目录
-out/touchable-ohos-0100D9F01D474000-gamepack.zip  单文件数据包
+out/touchable-ohos-0100D9F01D474000-gamepack.zip   单文件数据包（约 2.6 GB）
 ```
 
-`--pack-only` 在执行到第 5 步（组装 pack）后停止，**不会调用 devecocli**，
-也不要求存在 `app/build-profile.json5`。
+`--pack-only` 在执行到第 5 步（组装 pack）后生成 zip 并删除 `out/game-pack/`，
+**不会调用 devecocli**，也不要求存在 `app/build-profile.json5`。
+调试时需要保留目录就加 `--keep-pack-dir`。
 
 接着：
 
