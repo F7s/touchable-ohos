@@ -59,6 +59,10 @@ hdc -t <serial> install -r out/touchable-ohos-0100D9F01D474000-unsigned.hap
 - HAP 构建与安装：需要对应平台的 DevEco Studio（macOS / Windows）
 - Windows 用户把命令里的 `python3` 换成 `python` 或 `py -3`
 
+> **没有 DevEco Studio 的玩家**：不需要装 DevEco。只要 Python 3.11+ 和 .NET SDK 10，
+> 用 `--pack-only` 只生成数据包；HAP 直接下载 GitHub Release，用「小白调试助手」等
+> 第三方工具安装。见本文第 3.4 节「只生成数据包」。
+
 ### 1.2 安装 Python 依赖
 
 ```bash
@@ -183,6 +187,47 @@ nx2a-data.json   清单（title_id = 0100D9F01D474000）
 
 ---
 
+### 3.4 只生成数据包（没有 DevEco Studio）
+
+不需要 DevEco Studio、`devecocli`、签名配置，也不需要编译 HAP。只需要：
+
+- Python 3.11+（`pip install -r requirements.txt`）
+- .NET SDK 10
+- 自己的 `prod.keys` 和 NSP/XCI
+
+命令：
+
+```bash
+git clone https://github.com/F7s/touchable-ohos.git
+cd touchable-ohos
+python3 -m pip install -r requirements.txt
+
+python3 tools/build_from_image.py \
+  --keys /path/to/prod.keys \
+  --game /path/to/game-folder \
+  --pack-only \
+  --archive
+```
+
+产物：
+
+```text
+out/game-pack/                                    数据包目录
+out/touchable-ohos-0100D9F01D474000-gamepack.zip  单文件数据包
+```
+
+`--pack-only` 在执行到第 5 步（组装 pack）后停止，**不会调用 devecocli**，
+也不要求存在 `app/build-profile.json5`。
+
+接着：
+
+1. 从 [GitHub Releases](https://github.com/F7s/touchable-ohos/releases) 下载
+   `touchable-ohos-0100D9F01D474000-unsigned.hap`
+2. 用 **小白调试助手** 等第三方 HAP 安装工具把它装到手机
+   （按工具说明操作；如果提示未签名，用工具自带的调试签名/一键签名功能）
+3. 把 `gamepack.zip` 拷到手机 `Documents/`
+4. 打开 App → **UI → 导入数据包（ZIP）** → 导入完成后彻底关闭再打开
+
 ## 4. 签名与构建（首次需要）
 
 `app/build-profile.json5` 是**机器本地文件**，被 git 忽略；发布出去的仓库只有模板。
@@ -213,6 +258,9 @@ app/entry/build/default/outputs/default/entry-default-unsigned.hap
 ---
 
 ## 5. 安装到手机
+
+> 没有 DevEco Studio 的玩家：跳过本节，用 GitHub Release 的 HAP + 小白调试助手安装，
+> 然后直接从第 6 节开始。
 
 ```bash
 hdc list targets

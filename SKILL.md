@@ -92,6 +92,24 @@ UI (bottom-left) → **导入数据包（ZIP）** or **导入数据包（文件�
 - Folder import tree-copies the parts (peak ≈ 2× the pack).
 - Transfer the zip over USB; hdc over Wi-Fi measured ~3 MB/s (~14 min for 2.6 GB).
 
+### F. Data pack only (no DevEco Studio / devecocli)
+
+For players who install the published release HAP instead of building one:
+
+```bash
+python3 -m pip install -r requirements.txt          # Python 3.11+ and .NET SDK 10 only
+python3 tools/build_from_image.py \
+  --keys /path/to/prod.keys \
+  --game /path/to/folder-with-nsp-or-xci \
+  --pack-only --archive
+# out/game-pack/ + out/touchable-ohos-0100D9F01D474000-gamepack.zip
+```
+
+`--pack-only` stops after step 5 (pack assembly): no `devecocli`, no
+`app/build-profile.json5`, no app/native copy. The HAP comes from the GitHub release and is installed
+with a third-party sideload tool (e.g. 小白调试助手); the pack is imported through
+**UI → 导入数据包（ZIP）**.
+
 ### E. Release
 
 1. Build the code-only HAP (flow A), confirm `unzip -l` has no game data.

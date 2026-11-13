@@ -8,6 +8,19 @@ Touchable 风格节奏天国（Rhythm Heaven Groove）HarmonyOS 独立项目。
 - 目标：HarmonyOS 7.0 / API 26 / arm64
 - 本仓库不包含任何游戏数据
 
+## 没有 DevEco Studio？
+
+只需要 **Python 3.11+ 和 .NET SDK 10**，就能把游戏镜像转成数据包：
+
+```bash
+python3 tools/build_from_image.py --keys prod.keys --game ./game --pack-only --archive
+# out/game-pack/ + out/touchable-ohos-0100D9F01D474000-gamepack.zip
+```
+
+HAP 不用自己编译：从 [Releases](https://github.com/F7s/touchable-ohos/releases) 下载，
+用「小白调试助手」等第三方安装工具装到手机，再在 App 里导入数据包。
+详见 [docs/TUTORIAL.md](docs/TUTORIAL.md) 的 3.4 节「只生成数据包」。
+
 ## 文档
 
 - 完整使用教程：[docs/TUTORIAL.md](docs/TUTORIAL.md)（环境、签名、构建、导入、故障排查）

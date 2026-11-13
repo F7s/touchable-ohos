@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
-"""Build an unsigned Rhythm Heaven HarmonyOS HAP from a game image + prod.keys.
+"""Turn a Rhythm Heaven game image + prod.keys into a data pack (and optionally an unsigned HAP).
 
 Pipeline:
   keys + NSP/XCI
     -> nx_extract (ExeFS + full RomFS)
-    -> patch_nso.py rewrite of main/sdk/subsdk*
+    -> patch_nso.py rewrite of main/sdk/subsdk* (DM_TARGET=ohos)
     -> shader_split.py + shader_vk.py -> shaders.dmsv
-    -> make_pack.py -> game-pack/
-    -> stage pack + core into the app -> hvigor -> unsigned HAP
+    -> make_pack.py -> game-pack/ (+ optional .zip)
+    -> [without --pack-only] stage pack + core into the app -> hvigor -> unsigned HAP
 
 This project is standalone: the extraction, rewriting and shader-translation toolchain is vendored under
-vendor/nx2a/ (from nx2android, MIT; see vendor/nx2a/README.md). Nothing outside this repository is needed
-besides Python 3.11+, the .NET SDK, devecocli and the Python packages in requirements.txt.
+vendor/nx2a/ (from nx2android, MIT; see vendor/nx2a/README.md). Only Python 3.11+, the .NET SDK and the
+Python packages in requirements.txt are needed.
 
 Usage:
-  python3 tools/build_from_image.py \
-    --keys /path/to/prod.keys \
-    --game /path/to/game-folder \
-    [--out /path/to/output]
+  # data pack only: no DevEco Studio / devecocli required (for players who install the release HAP)
+  python3 tools/build_from_image.py --keys prod.keys --game ./game --pack-only --archive
+
+  # data pack + unsigned HAP: needs DevEco Studio (devecocli) and a local signing config
+  python3 tools/build_from_image.py --keys prod.keys --game ./game --no-embed-pack --archive
 
 `--game` is a folder containing the base NSP/XCI (and optional update/DLC).
 `--out` defaults to <project>/out (git-ignored, so generated game data is never committed or published).
-Use --no-embed-pack to produce a code-only HAP plus a separate game-pack/.
 """
 import argparse
 import os
@@ -82,6 +82,9 @@ def main():
     ap.add_argument('--title-id', default=GAME_ID)
     ap.add_argument('--language', default='en-US')
     ap.add_argument('--version', default='1.0.0')
+    ap.add_argument('--pack-only', action='store_true',
+                    help='stop after game-pack/ (and --archive): no DevEco Studio, devecocli or signing '
+                         'config needed; the player installs the release HAP')
     ap.add_argument('--no-embed-pack', action='store_true',
                     help='do not put game data into the HAP; emit game-pack/ beside it')
     ap.add_argument('--archive', action='store_true',
@@ -91,23 +94,27 @@ def main():
 
     require(args.keys, 'prod.keys')
     require(args.game, 'game folder')
-    require(CORE, 'core/libdmcore.so')
-    if not (APP / 'build-profile.json5').exists():
-        raise SystemExit(
-            'app/build-profile.json5 is missing. It is machine-local and git-ignored (the published '
-            'repository ships only build-profile.template.json5), so create it once with your own '
-            'signing material:\n'
-            '  cd app\n'
-            '  cp build-profile.template.json5 build-profile.json5\n'
-            '  devecocli signature generate --type debug')
     check_python_deps()
     check_dotnet()
     extract_mods = require(VENDOR / 'tools' / 'extract_mods.py', 'vendored extract_mods.py')
     patch_nso = require(VENDOR / 'nxnative' / 'dm' / 'tools' / 'patch_nso.py', 'vendored patch_nso.py')
     shader_split = require(VENDOR / 'nxnative' / 'dm' / 'gfx' / 'tools' / 'shader_split.py', 'vendored shader_split.py')
     shader_vk = require(VENDOR / 'nxnative' / 'dm' / 'android' / 'tools' / 'shader_vk.py', 'vendored shader_vk.py')
-    stage = require(HERE / 'stage_data_pack.py', 'stage_data_pack.py')
+    if args.pack_only:
+        stage = None
+    else:
+        require(CORE, 'core/libdmcore.so')
+        if not (APP / 'build-profile.json5').exists():
+            raise SystemExit(
+                'app/build-profile.json5 is missing. It is machine-local and git-ignored (the published '
+                'repository ships only build-profile.template.json5), so create it once with your own '
+                'signing material:\n'
+                '  cd app\n'
+                '  cp build-profile.template.json5 build-profile.json5\n'
+                '  devecocli signature generate --type debug')
+        stage = require(HERE / 'stage_data_pack.py', 'stage_data_pack.py')
 
+    total = 5 if args.pack_only else 6
     out = args.out.resolve() if args.out else (PROJECT / 'out').resolve()
     out.mkdir(parents=True, exist_ok=True)
     work = out / 'work'
@@ -120,7 +127,7 @@ def main():
     env = dict(os.environ, DM_GAME=args.title_id, DM_TARGET='ohos', DOTNET_CLI_TELEMETRY_OPTOUT='1')
 
     # 1. Extract ExeFS + full RomFS.
-    print(f'[{1}/6] extracting game image', flush=True)
+    print(f'[{1}/{total}] extracting game image', flush=True)
     run([sys.executable, extract_mods, args.game, work, args.keys, '--full-romfs'], env=env)
     extract = work / 'extract'
     versions = sorted([p for p in extract.iterdir() if p.is_dir() and not p.name.endswith('.partial')])
@@ -133,7 +140,7 @@ def main():
     require(exefs / 'main', 'extracted ExeFS/main')
 
     # 2. Rewrite the executable modules.
-    print(f'[{2}/6] rewriting modules', flush=True)
+    print(f'[{2}/{total}] rewriting modules', flush=True)
     mods = out / 'mods'
     if mods.exists():
         shutil.rmtree(mods)
@@ -156,19 +163,19 @@ def main():
             raise SystemExit(f'{fix.name}: rewritten for TARGET {target or "(missing)"}, expected 0x2 (HarmonyOS)')
 
     # 3. Split and translate shaders.
-    print(f'[{3}/6] splitting shaders', flush=True)
+    print(f'[{3}/{total}] splitting shaders', flush=True)
     pkg = work / 'shader-pkg'
     shader_map = work / 'shader_map.tsv'
     shader_facts = work / 'shader_facts.tsv'
     shader_pairs = work / 'shader_pairs.tsv'
     run([sys.executable, shader_split, romfs, exefs / 'main', pkg,
          shader_map, shader_facts, shader_pairs], env=env)
-    print(f'[{4}/6] translating shaders', flush=True)
+    print(f'[{4}/{total}] translating shaders', flush=True)
     shaders = work / 'shaders.dmsv'
     run([sys.executable, shader_vk, pkg, shaders, '--jobs', str(os.cpu_count() or 8)], env=env)
 
     # 4. Build the data pack with the standalone pack tool.
-    print(f'[{5}/6] building data pack', flush=True)
+    print(f'[{5}/{total}] building data pack', flush=True)
     pack = out / 'game-pack'
     archive = out / f'touchable-ohos-{args.title_id}-gamepack.zip'
     pack_cmd = [sys.executable, HERE / 'make_pack.py',
@@ -178,8 +185,18 @@ def main():
         pack_cmd += ['--zip', str(archive)]
     run(pack_cmd)
 
-    # 5. Embed the pack into a copy of the app and build.
-    print(f'[{6}/6] building HAP', flush=True)
+    if args.pack_only:
+        print(f'\ndata pack:    {pack}')
+        if args.archive:
+            print(f'zip archive:  {archive}')
+        print('Pack only: no HAP was built. Install the release HAP, then import the pack in the app '
+              '(UI -> 导入数据包（ZIP）/（文件夹）).')
+        if not args.keep_work:
+            shutil.rmtree(work, ignore_errors=True)
+        return
+
+    # 6. Embed the pack into a copy of the app and build.
+    print(f'[{6}/{total}] building HAP', flush=True)
     # The app's CMakeLists.txt adds ../native relative to the project root (app/entry/src/main/cpp -> ../../../../../native),
     # so the build copy needs the same app/ + native/ layout as the repository.
     build_root = work / 'project'
