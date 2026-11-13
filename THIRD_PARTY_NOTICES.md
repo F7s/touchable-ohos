@@ -2,6 +2,19 @@
 
 This project builds on the following open-source projects. Each keeps its own license.
 
+## nx2android / nxnative (upstream project)
+
+This project is a standalone HarmonyOS fork of the **nx2android** port of Rhythm Heaven Groove:
+the app shell (ArkTS UI + NAPI host), the native platform layer (`native/`) and the prebuilt game
+core (`core/libdmcore.so`, `app/entry/libs/arm64-v8a/libdmcore.so`) all derive from nx2android's
+nxnative/DM engine and HarmonyOS packaging. The from-image toolchain is additionally vendored
+under `vendor/nx2a/`.
+
+- Project: https://github.com/seedds/nx2android (nxnative / DM engine)
+- Copyright (c) 2026 seedds
+- License: MIT
+- Upstream third-party details: nx2android `nxnative/dm/third_party/README.md`
+
 ## Touchable
 
 The HarmonyOS front end ports the UI/host integration and the touch layer of Touchable's iOS
@@ -21,16 +34,13 @@ as marked in the file headers.
 - Copyright (c) 2026 jhaizhou
 - License: MIT
 
-## nx2android / nxnative toolchain (vendored)
+## nx2android toolchain (vendored under `vendor/nx2a/`)
 
 `vendor/nx2a/` contains the game-image build toolchain from nx2android (Python sources and the
 prebuilt `dmsh_xlate` .NET translator), vendored so that `tools/build_from_image.py` needs no
 external checkout. Its provenance and the exact list of vendored paths are in
-`vendor/nx2a/README.md`.
-
-- Project: https://github.com/seedds/nx2android (nxnative)
-- Copyright (c) 2026 seedds
-- License: MIT, `vendor/nx2a/LICENSE`
+`vendor/nx2a/README.md`; the license is copied to `vendor/nx2a/LICENSE` (MIT, Copyright (c) 2026
+seedds).
 
 Bundled inside the vendored translator (`dmsh_xlate_bin/`):
 
